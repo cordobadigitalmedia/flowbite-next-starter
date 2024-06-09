@@ -1,64 +1,44 @@
-import { useSidebarContext } from "@/context/SidebarContext";
 import { Sidebar } from "flowbite-react";
 import type { FC } from "react";
-import { BiBuoy } from "react-icons/bi";
-import {
-  HiArrowSmRight,
-  HiChartPie,
-  HiInbox,
-  HiShoppingBag,
-  HiTable,
-  HiUser,
-  HiViewBoards,
-} from "react-icons/hi";
-import { twMerge } from "tailwind-merge";
+import { FaBrain, FaCompass, FaPeopleArrows, FaTools } from "react-icons/fa";
+import { HiUser } from "react-icons/hi";
+
+/**
+ *
+ * @returns
+ *         "fixed inset-y-0 left-0 z-20 mt-16 flex h-full shrink-0 flex-col border-r border-gray-200 duration-75 dark:border-gray-700 lg:flex",
+ */
 
 export const DashboardSidebar: FC = function () {
-  const { isCollapsed } = useSidebarContext();
-
   return (
     <Sidebar
       aria-label="Sidebar with multi-level dropdown example"
-      collapsed={isCollapsed}
       id="sidebar"
-      className={twMerge(
-        "fixed inset-y-0 left-0 z-20 mt-16 flex h-full shrink-0 flex-col border-r border-gray-200 duration-75 dark:border-gray-700 lg:flex",
-        isCollapsed && "hidden w-16",
-      )}
+      className="hidden sm:block"
     >
       <Sidebar.Items>
         <Sidebar.ItemGroup>
-          <Sidebar.Item href="#" icon={HiChartPie}>
-            Dashboard
+          <Sidebar.Item href="/orientation" icon={FaCompass}>
+            Orientation
           </Sidebar.Item>
-          <Sidebar.Item href="#" icon={HiViewBoards}>
-            Kanban
-          </Sidebar.Item>
-          <Sidebar.Item href="#" icon={HiInbox}>
-            Inbox
+          <Sidebar.Collapse icon={FaBrain} label="Concepts">
+            <Sidebar.Item href="#" className="text-wrap">
+              Analysis Framework
+            </Sidebar.Item>
+            <Sidebar.Item href="#" className="text-wrap">
+              State of Prisons in Canada
+            </Sidebar.Item>
+            <Sidebar.Item href="#">Concept of Isolation</Sidebar.Item>
+            <Sidebar.Item href="#">Rooted in Islamic Tradition</Sidebar.Item>
+          </Sidebar.Collapse>
+          <Sidebar.Item href="#" icon={FaTools}>
+            Tools & Resources
           </Sidebar.Item>
           <Sidebar.Item href="#" icon={HiUser}>
-            Users
+            Prison Visits
           </Sidebar.Item>
-          <Sidebar.Item href="#" icon={HiShoppingBag}>
-            Products
-          </Sidebar.Item>
-          <Sidebar.Item href="#" icon={HiArrowSmRight}>
-            Sign In
-          </Sidebar.Item>
-          <Sidebar.Item href="#" icon={HiTable}>
-            Sign Up
-          </Sidebar.Item>
-        </Sidebar.ItemGroup>
-        <Sidebar.ItemGroup>
-          <Sidebar.Item href="#" icon={HiChartPie}>
-            Upgrade to Pro
-          </Sidebar.Item>
-          <Sidebar.Item href="#" icon={HiViewBoards}>
-            Documentation
-          </Sidebar.Item>
-          <Sidebar.Item href="#" icon={BiBuoy}>
-            Help
+          <Sidebar.Item href="#" icon={FaPeopleArrows}>
+            Community
           </Sidebar.Item>
         </Sidebar.ItemGroup>
       </Sidebar.Items>

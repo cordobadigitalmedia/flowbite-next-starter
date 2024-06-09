@@ -1,6 +1,6 @@
 "use client";
 
-import { SidebarProvider, useSidebarContext } from "@/context/SidebarContext";
+import { SidebarProvider } from "@/context/SidebarContext";
 import type { FC, PropsWithChildren } from "react";
 import { twMerge } from "tailwind-merge";
 import { DashboardNavbar } from "./navbar";
@@ -15,21 +15,20 @@ const DashboardLayout: FC<PropsWithChildren> = function ({ children }) {
 };
 
 const DashboardLayoutContent: FC<PropsWithChildren> = function ({ children }) {
-  const { isCollapsed } = useSidebarContext();
-
   return (
     <>
       <DashboardNavbar />
-      <div className="mt-16 flex items-start">
-        <DashboardSidebar />
+      <div className="mt-20 flex">
         <div
           id="main-content"
           className={twMerge(
             "relative h-full w-full overflow-y-auto bg-gray-50 dark:bg-gray-900",
-            isCollapsed ? "lg:ml-[4.5rem]" : "lg:ml-64",
           )}
         >
-          {children}
+          <div className="container mx-auto flex max-w-7xl">
+            <DashboardSidebar />
+            {children}
+          </div>
         </div>
       </div>
     </>

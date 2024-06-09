@@ -1,10 +1,10 @@
 {
-  "header": [
+  "headerLinks": [
     { "name": "Courses", "href": "/courses" },
     { "name": "About", "href": "/about" },
     { "name": "Community", "href": "/community" }
   ],
-  "footer": [
+  "footerLinks": [
     { "name": "Contact", "href": "/contact" },
     { "name": "Privacy", "href": "/privacy" }
   ]

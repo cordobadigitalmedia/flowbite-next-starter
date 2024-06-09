@@ -24,6 +24,7 @@
     "npm": ">= 8"
   },
   "dependencies": {
+    "@clerk/nextjs": "^5.1.4",
     "flowbite": "^2.2.0",
     "flowbite-react": "^0.7.0",
     "next": "^14.0.3",
