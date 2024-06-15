@@ -28,12 +28,7 @@
         "config": "tailwind.config.ts"
       }
     ],
-    "tailwindcss/no-custom-classname": [
-      "error",
-      {
-        "config": "tailwind.config.ts"
-      }
-    ]
+    "tailwindcss/no-custom-classname": ["off"]
   },
   "settings": {
     "react": {
