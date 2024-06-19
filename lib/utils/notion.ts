@@ -1,13 +1,12 @@
 import { Client } from "@notionhq/client";
 import { NotionToMarkdown } from "notion-to-md";
-import React from "react";
 import "server-only";
 
 export const notion = new Client({
   auth: process.env.NOTION_SECRET,
 });
 
-export const fetchSiteDB = React.cache(async () => {
+export const fetchSiteDB = async () => {
   const results = await notion.databases.query({
     database_id: process.env.NOTION_ROOT_PAGE as string,
     filter: {
@@ -19,9 +18,9 @@ export const fetchSiteDB = React.cache(async () => {
     sorts: [{ direction: "ascending", property: "Order" }],
   });
   return results;
-});
+};
 
-export const fetchPageBySlug = React.cache(async (slug: string) => {
+export const fetchPageBySlug = async (slug: string) => {
   const results = await notion.databases.query({
     database_id: process.env.NOTION_ROOT_PAGE as string,
     filter: {
@@ -40,7 +39,7 @@ export const fetchPageBySlug = React.cache(async (slug: string) => {
   } else {
     return { markdown: "", blocks: "" };
   }
-});
+};
 
 export const fetchPageMD = async (id: string) => {
   const n2m = new NotionToMarkdown({ notionClient: notion });
