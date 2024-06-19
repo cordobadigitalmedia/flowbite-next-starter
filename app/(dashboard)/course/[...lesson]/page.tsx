@@ -6,8 +6,6 @@ import { buildTree } from "@/lib/utils/parser";
 import type { Page } from "@/lib/utils/types";
 import { MDXRemote } from "next-mdx-remote/rsc";
 
-export const revalidate = 86400; // revalidate the data at most every day
-
 export default async function Page({
   params,
 }: {
