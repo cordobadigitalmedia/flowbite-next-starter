@@ -8,6 +8,11 @@ const config = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      {
+        protocol: "https",
+        hostname: "ukcumkp5whcfmjcn.public.blob.vercel-storage.com",
+        port: "",
+      },
     ],
   },
 };

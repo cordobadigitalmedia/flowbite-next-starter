@@ -1,6 +1,10 @@
 import { Client } from "@notionhq/client";
+import { put } from "@vercel/blob";
 import { NotionToMarkdown } from "notion-to-md";
 import "server-only";
+
+const imgPrefix = `<div class="not-prose flex flex-col justify-center items-center p-0 m-0">`;
+const captionPrefix = `<div class="text-sm text-gray-400 pt-2 text-center">`;
 
 export const notion = new Client({
   auth: process.env.NOTION_SECRET,
@@ -34,6 +38,7 @@ export const fetchPageBySlug = async (slug: string) => {
   });
   if (results.results.length > 0) {
     const pageid = results.results[0].id;
+    //pass database id to fecthMD
     const pageData = fetchPageMD(pageid);
     return pageData;
   } else {
@@ -51,6 +56,35 @@ export const fetchPageMD = async (id: string) => {
     return `
         <iframe src="${video_url}" frameborder="0" allowfullscreen/>
     `;
+  });
+  n2m.setCustomTransformer("image", async (block) => {
+    //eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { image } = block as any;
+    const { caption } = image as { caption: { plain_text: string }[] };
+    const { type } = image;
+    const img_url = image[type].url;
+    let captionText = "";
+    let returnComp = "";
+    if (caption.length > 0) {
+      captionText = caption.map((item) => item.plain_text).join("\n");
+    }
+    if (process.env.ENABLE_UPLOAD === "true") {
+      //use database id to check if image was uploaded before
+      //Save the image id from the url `/032244c2-cdae-4189-be3d-12360518595e/filename.png/jpg` in string separated by | - compare in future to check if exists
+      const imageResponse = await fetch(img_url);
+      if (!imageResponse.ok) {
+        throw new Error("Failed to fetch image");
+      }
+      const imageBuffer = await imageResponse.arrayBuffer();
+      const blob = await put("lms-image", imageBuffer, {
+        access: "public",
+      });
+      returnComp += `${imgPrefix}<img src="${blob.downloadUrl}" alt="${captionText}"/>${captionPrefix}${captionText}</div></div>`;
+    } else {
+      returnComp += `${imgPrefix}<img src="${img_url}" alt="${captionText}"/>${captionPrefix}${captionText}</div></div>`;
+    }
+    //after successful upload, set checkbox for database row to checked
+    return returnComp;
   });
   const mdblocks = await n2m.pageToMarkdown(id);
   const mdString = n2m.toMarkdownString(mdblocks);

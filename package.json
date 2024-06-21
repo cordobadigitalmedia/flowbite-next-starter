@@ -26,6 +26,7 @@
   "dependencies": {
     "@clerk/nextjs": "^5.1.4",
     "@notionhq/client": "^2.2.15",
+    "@vercel/blob": "^0.23.3",
     "next": "^14.0.3",
     "next-mdx-remote": "^5.0.0",
     "notion-to-md": "^3.1.1",
@@ -37,6 +38,7 @@
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^14.0.0",
+    "@tailwindcss/typography": "^0.5.13",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -56,7 +58,6 @@
     "prettier-plugin-organize-imports": "^3.2.3",
     "prettier-plugin-tailwindcss": "^0.5.7",
     "tailwindcss": "^3",
-    "@tailwindcss/typography": "^0.5.13",
     "typescript": "^5"
   },
   "private": true,
