@@ -38,3 +38,23 @@ export const buildTree = (
 
   return { tree: rootNodes, pages: flatpages };
 };
+
+export function extractBookmarlUrl(markdown: string): string | null {
+  const regex = /\[bookmark\]\((https?:\/\/[^\s]+)\)/;
+  const match = markdown.match(regex);
+  return match ? match[1] : null;
+}
+
+function isYouTubeUrl(url: string): boolean {
+  const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/;
+  return youtubeRegex.test(url);
+}
+
+export function transformToEmbedUrl(url: string): string | null {
+  if (!isYouTubeUrl(url)) {
+    return null;
+  }
+  const regex = /https:\/\/youtu\.be\/([a-zA-Z0-9_-]+)/;
+  const match = url.match(regex);
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+}

@@ -2,6 +2,7 @@ import { Client } from "@notionhq/client";
 import { put } from "@vercel/blob";
 import { NotionToMarkdown } from "notion-to-md";
 import "server-only";
+import { transformToEmbedUrl } from "./parser";
 
 const imgPrefix = `<div class="not-prose flex flex-col justify-center items-center p-0 m-0">`;
 const captionPrefix = `<div class="text-sm text-gray-400 pt-2 text-center">`;
@@ -57,6 +58,17 @@ export const fetchPageMD = async (id: string) => {
         <iframe src="${video_url}" frameborder="0" allowfullscreen/>
     `;
   });
+  n2m.setCustomTransformer("bookmark", async (block) => {
+    //eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { bookmark } = block as any;
+    const { url } = bookmark;
+    const embed_url = transformToEmbedUrl(url);
+    return `
+    <div class="p-2 no-prose flex flex-col justify-center w-full min-h-[600px] h-screen">
+    <iframe src="${embed_url}" frameBorder="0" height="100%" width="100%" allowFullScreen/>
+    </div>
+    `;
+  });
   n2m.setCustomTransformer("image", async (block) => {
     //eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { image } = block as any;
@@ -87,6 +99,7 @@ export const fetchPageMD = async (id: string) => {
     return returnComp;
   });
   const mdblocks = await n2m.pageToMarkdown(id);
+  console.log(mdblocks);
   const mdString = n2m.toMarkdownString(mdblocks);
   return { markdown: mdString.parent, blocks: mdblocks };
 };
