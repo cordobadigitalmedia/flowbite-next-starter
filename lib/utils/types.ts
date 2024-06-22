@@ -31,6 +31,11 @@ export interface Properties {
       string: string;
     };
   };
+  type: {
+    select: {
+      name: ContentType;
+    };
+  };
 }
 
 export interface Parent {
@@ -51,11 +56,26 @@ export interface BasePage {
   id: string;
   title: string;
   slug: string;
+  type: ContentType;
 }
+
+export type ContentType =
+  | "assignment"
+  | "video"
+  | "journal"
+  | "discussion"
+  | "text quiz"
+  | "mp quiz"
+  | "rich media"
+  | "learning plan"
+  | "module"
+  | "rich text"
+  | "course overview";
 
 export interface TreeNode {
   id: string;
   children: TreeNode[];
   title: string;
   slug: string;
+  type: ContentType;
 }

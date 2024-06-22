@@ -12,6 +12,7 @@ export const buildTree = (
       id: page.id,
       title: page.properties.Name.title[0].plain_text,
       slug: page.properties.Slug.formula.string,
+      type: page.properties.type.select.name,
       children: [],
     };
   });
@@ -33,8 +34,33 @@ export const buildTree = (
   const flatpages: BasePage[] = [];
 
   for (const value of Object.values(nodeMap)) {
-    flatpages.push({ id: value.id, title: value.title, slug: value.slug });
+    flatpages.push({
+      id: value.id,
+      title: value.title,
+      slug: value.slug,
+      type: value.type,
+    });
   }
 
   return { tree: rootNodes, pages: flatpages };
 };
+
+export function extractBookmarlUrl(markdown: string): string | null {
+  const regex = /\[bookmark\]\((https?:\/\/[^\s]+)\)/;
+  const match = markdown.match(regex);
+  return match ? match[1] : null;
+}
+
+export function isYouTubeUrl(url: string): boolean {
+  const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/;
+  return youtubeRegex.test(url);
+}
+
+export function transformToEmbedUrl(url: string): string | null {
+  if (!isYouTubeUrl(url)) {
+    return null;
+  }
+  const regex = /https:\/\/youtu\.be\/([a-zA-Z0-9_-]+)/;
+  const match = url.match(regex);
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+}

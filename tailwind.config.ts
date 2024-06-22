@@ -16,7 +16,11 @@ const config: Config = {
       },
     },
   },
-  plugins: [require("preline/plugin"), require("@tailwindcss/typography")],
+  plugins: [
+    require("preline/plugin"),
+    require("@tailwindcss/typography"),
+    require("@tailwindcss/aspect-ratio"),
+  ],
 };
 
 export default config;

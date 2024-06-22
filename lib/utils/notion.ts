@@ -1,7 +1,8 @@
 import { Client } from "@notionhq/client";
+import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import { put } from "@vercel/blob";
 import { NotionToMarkdown } from "notion-to-md";
-import "server-only";
+import type { ContentType } from "./types";
 
 const imgPrefix = `<div class="not-prose flex flex-col justify-center items-center p-0 m-0">`;
 const captionPrefix = `<div class="text-sm text-gray-400 pt-2 text-center">`;
@@ -38,15 +39,23 @@ export const fetchPageBySlug = async (slug: string) => {
   });
   if (results.results.length > 0) {
     const pageid = results.results[0].id;
+    const pageResp = results.results[0] as PageObjectResponse;
+    const { type } = pageResp.properties;
+    let cType;
+    if (type.type === "select") {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const { name } = type.select!;
+      cType = name;
+    }
     //pass database id to fecthMD
-    const pageData = fetchPageMD(pageid);
+    const pageData = await fetchPageMD(pageid, cType as ContentType);
     return pageData;
   } else {
-    return { markdown: "", blocks: "" };
+    return { markdown: "", blocks: "", type: "rich text" };
   }
 };
 
-export const fetchPageMD = async (id: string) => {
+export const fetchPageMD = async (id: string, type: ContentType) => {
   const n2m = new NotionToMarkdown({ notionClient: notion });
   n2m.setCustomTransformer("video", async (block) => {
     //eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -88,5 +97,5 @@ export const fetchPageMD = async (id: string) => {
   });
   const mdblocks = await n2m.pageToMarkdown(id);
   const mdString = n2m.toMarkdownString(mdblocks);
-  return { markdown: mdString.parent, blocks: mdblocks };
+  return { markdown: mdString.parent, blocks: mdblocks, type };
 };
