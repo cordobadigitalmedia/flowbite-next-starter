@@ -2,14 +2,26 @@
 import type { TreeNode } from "@/lib/utils/types";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { BsJournals } from "react-icons/bs";
+import { FaUpload } from "react-icons/fa";
+import { FaVideo } from "react-icons/fa6";
+import { GoCommentDiscussion } from "react-icons/go";
+import { MdOutlinePermMedia, MdOutlineQuiz } from "react-icons/md";
 
 export function LinkItem({ node }: { node: TreeNode }) {
   const pathname = usePathname();
   return (
     <Link
-      className={`flex items-center gap-x-3.5 rounded-lg px-2.5 py-2 text-sm text-neutral-700 hover:bg-gray-100 dark:bg-neutral-700 dark:text-white ${node.slug === pathname.replaceAll("/course/", "") ? ` bg-gray-100` : ``}`}
+      className={`my-1 flex items-center gap-x-3.5 rounded-lg px-2.5 py-2 text-sm text-neutral-700 hover:bg-gray-100 dark:bg-neutral-700 dark:text-white ${node.slug === pathname.replaceAll("/course/", "") ? ` bg-gray-100` : ``}`}
       href={`/course/${node.slug}`}
     >
+      {node.type === "assignment" && <FaUpload className="w-5" />}
+      {node.type === "rich media" && <MdOutlinePermMedia className="w-5" />}
+      {node.type === "video" && <FaVideo className="w-5" />}
+      {node.type === "discussion" && <GoCommentDiscussion className="w-5" />}
+      {node.type === "journal" && <BsJournals className="w-5" />}
+      {node.type === "mp quiz" && <MdOutlineQuiz className="w-5" />}
+      {node.type === "text quiz" && <MdOutlineQuiz className="w-5" />}
       {node.title}
     </Link>
   );

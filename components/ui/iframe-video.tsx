@@ -1,11 +1,13 @@
 export function VideoPlayer({ url }: { url: string }): JSX.Element {
   return (
-    <iframe
-      src={url}
-      frameBorder="0"
-      height="100%"
-      width="100%"
-      allowFullScreen
-    />
+    <div className="aspect-h-9 aspect-w-16">
+      <iframe
+        src={url}
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope;"
+        allowFullScreen
+        title="video player"
+      />
+    </div>
   );
 }
