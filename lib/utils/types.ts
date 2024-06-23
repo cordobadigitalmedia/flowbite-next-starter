@@ -44,6 +44,7 @@ export interface CourseItem {
   description: string;
   slug: string;
   available: boolean;
+  database_id: string;
 }
 
 export interface Parent {
@@ -85,5 +86,11 @@ export interface TreeNode {
   children: TreeNode[];
   title: string;
   slug: string;
+  root_slug: string;
   type: ContentType;
+}
+
+export interface CoursePaths {
+  course: string;
+  lesson?: string[];
 }

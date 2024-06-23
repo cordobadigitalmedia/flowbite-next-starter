@@ -1,16 +1,18 @@
 import { Logo } from "@/components/ui/logo";
 import { Sidebar } from "@/components/ui/sidebar";
-import { fetchSiteDB } from "@/lib/utils/notion";
+import { fetchLessons } from "@/lib/utils/notion";
 import { buildTree } from "@/lib/utils/parser";
 import type { Page } from "@/lib/utils/types";
 
 export default async function DashboardLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params: { course: string };
 }>) {
-  const notionDB = await fetchSiteDB();
-  const { tree } = buildTree(notionDB.results as Page[]);
+  const notionDB = await fetchLessons(params.course);
+  const { tree } = buildTree(notionDB.results as Page[], params.course);
   return (
     <>
       <div

@@ -5,6 +5,7 @@ import { LinkItem } from "./link-item";
 
 export function NavItem({ node }: { node: TreeNode }) {
   const pathname = usePathname();
+  console.log(pathname, node);
   return (
     <>
       {node.children.length > 0 ? (

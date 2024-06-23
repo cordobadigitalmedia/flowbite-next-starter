@@ -1,16 +1,15 @@
 import { AssignmentUpload } from "@/components/ui/assignment-upload";
 import { CustomMDX } from "@/components/ui/mdx-remote";
-import { fetchLessons, fetchPageBySlug } from "@/lib/utils/notion";
-import { buildTree } from "@/lib/utils/parser";
-import type { Page } from "@/lib/utils/types";
+import { fetchPageBySlug, fetchSlugs } from "@/lib/utils/notion";
 
 export default async function Page({
   params,
 }: {
-  params: { lesson: string[] };
+  params: { lesson: string[]; course: string };
 }) {
   const { markdown, type } = await fetchPageBySlug(
     params.lesson[params.lesson.length - 1],
+    params.course,
   );
   return (
     <>
@@ -31,9 +30,6 @@ export default async function Page({
 }
 
 export async function generateStaticParams() {
-  const notionDB = await fetchLessons();
-  const { pages } = buildTree(notionDB.results as Page[]);
-  return pages.map((node) => ({
-    lesson: node.slug.split("/"),
-  }));
+  const pageSlugs = await fetchSlugs();
+  return pageSlugs;
 }
