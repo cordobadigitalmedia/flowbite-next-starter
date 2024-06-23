@@ -38,6 +38,14 @@ export interface Properties {
   };
 }
 
+export interface CourseItem {
+  image: string;
+  title: string;
+  description: string;
+  slug: string;
+  available: boolean;
+}
+
 export interface Parent {
   type: string;
   database_id: string;

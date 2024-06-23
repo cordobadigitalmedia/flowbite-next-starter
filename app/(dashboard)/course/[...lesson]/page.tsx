@@ -1,6 +1,6 @@
 import { AssignmentUpload } from "@/components/ui/assignment-upload";
 import { CustomMDX } from "@/components/ui/mdx-remote";
-import { fetchPageBySlug, fetchSiteDB } from "@/lib/utils/notion";
+import { fetchLessons, fetchPageBySlug } from "@/lib/utils/notion";
 import { buildTree } from "@/lib/utils/parser";
 import type { Page } from "@/lib/utils/types";
 
@@ -31,7 +31,7 @@ export default async function Page({
 }
 
 export async function generateStaticParams() {
-  const notionDB = await fetchSiteDB();
+  const notionDB = await fetchLessons();
   const { pages } = buildTree(notionDB.results as Page[]);
   return pages.map((node) => ({
     lesson: node.slug.split("/"),

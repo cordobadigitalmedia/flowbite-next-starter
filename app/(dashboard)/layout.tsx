@@ -1,15 +1,10 @@
 import { Header } from "@/components/ui/header";
-import { fetchSiteDB } from "@/lib/utils/notion";
-import { buildTree } from "@/lib/utils/parser";
-import type { Page } from "@/lib/utils/types";
 
 export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const notionDB = await fetchSiteDB();
-  const { tree } = buildTree(notionDB.results as Page[]);
   return (
     <div>
       <Header />

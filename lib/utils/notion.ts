@@ -1,8 +1,11 @@
 import { Client } from "@notionhq/client";
-import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
+import type {
+  DatabaseObjectResponse,
+  PageObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints";
 import { put } from "@vercel/blob";
 import { NotionToMarkdown } from "notion-to-md";
-import type { ContentType } from "./types";
+import type { ContentType, CourseItem } from "./types";
 
 const imgPrefix = `<div class="not-prose flex flex-col justify-center items-center p-0 m-0">`;
 const captionPrefix = `<div class="text-sm text-gray-400 pt-2 text-center">`;
@@ -11,9 +14,9 @@ export const notion = new Client({
   auth: process.env.NOTION_SECRET,
 });
 
-export const fetchSiteDB = async () => {
+const fetchDBItems = async (id: string) => {
   const results = await notion.databases.query({
-    database_id: process.env.NOTION_ROOT_PAGE as string,
+    database_id: id,
     filter: {
       property: "Publish",
       checkbox: {
@@ -23,6 +26,45 @@ export const fetchSiteDB = async () => {
     sorts: [{ direction: "ascending", property: "Order" }],
   });
   return results;
+};
+
+export const fetchLessons = async () => {
+  const results = await fetchDBItems(process.env.NOTION_LESSONS as string);
+  return results;
+};
+
+export const fetchCourses = async () => {
+  const { results } = await fetchDBItems(process.env.NOTION_COURSES as string);
+  console.log(results);
+  let courses: CourseItem[] = [];
+  for (const result of results) {
+    const { properties } = result as DatabaseObjectResponse;
+    const { Image, Name, Description, Slug, Available } = properties;
+    let url;
+    let title;
+    let description;
+    let slug;
+    let available: boolean = true;
+    if (Image.type === "files") {
+      url = Image.files[0].file.url;
+    }
+    if (Name.type === "title") {
+      title = Name.title[0].plain_text;
+    }
+    if (Description.type === "rich_text") {
+      description = Description.rich_text[0].plain_text;
+    }
+    if (Slug.type === "formula") {
+      slug = Slug.formula.string;
+    }
+    console.log(Available);
+    if (Available.type === "checkbox") {
+      available = Available.checkbox as unknown as boolean;
+    }
+    courses.push({ image: url, title, description, slug, available });
+  }
+
+  return courses;
 };
 
 export const fetchPageBySlug = async (slug: string) => {
