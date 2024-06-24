@@ -1,4 +1,4 @@
-import { CourseItem } from "@/lib/utils/types";
+import type { CourseItem } from "@/lib/utils/types";
 import Link from "next/link";
 
 export function Card({ item }: { item: CourseItem }) {

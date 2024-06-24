@@ -4,13 +4,13 @@ import { fetchLessons } from "@/lib/utils/notion";
 import { buildTree } from "@/lib/utils/parser";
 import type { Page } from "@/lib/utils/types";
 
-export default async function DashboardLayout({
+export default async function Wrapper({
   children,
   params,
-}: Readonly<{
+}: {
   children: React.ReactNode;
   params: { course: string };
-}>) {
+}) {
   const notionDB = await fetchLessons(params.course);
   const { tree } = buildTree(notionDB.results as Page[], params.course);
   return (
@@ -22,7 +22,7 @@ export default async function DashboardLayout({
         <div className="px-8 pt-4">
           <Logo />
         </div>
-        <Sidebar navData={tree} />
+        <Sidebar navData={tree} course={params.course} />
       </div>
       {children}
     </>

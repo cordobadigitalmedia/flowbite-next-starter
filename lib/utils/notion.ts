@@ -1,8 +1,5 @@
 import { Client } from "@notionhq/client";
-import type {
-  DatabaseObjectResponse,
-  PageObjectResponse,
-} from "@notionhq/client/build/src/api-endpoints";
+import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import { put } from "@vercel/blob";
 import { NotionToMarkdown } from "notion-to-md";
 import { buildTree } from "./parser";
@@ -30,15 +27,16 @@ const fetchDBItems = async (id: string) => {
 };
 
 export const fetchLessons = async (slug: string) => {
-  const results = await fetchDBItems(process.env.NOTION_LESSONS as string);
+  const database_id = await getCourseDatabaseID(slug);
+  const results = await fetchDBItems(database_id as string);
   return results;
 };
 
 export const fetchCourses = async () => {
   const { results } = await fetchDBItems(process.env.NOTION_COURSES as string);
-  let courses: CourseItem[] = [];
+  const courses: CourseItem[] = [];
   for (const result of results) {
-    const { properties } = result as DatabaseObjectResponse;
+    const { properties } = result as PageObjectResponse;
     const { Image, Name, Description, Slug, Available, Database } = properties;
     let url;
     let title;
@@ -47,7 +45,9 @@ export const fetchCourses = async () => {
     let available: boolean = true;
     let database_id;
     if (Image.type === "files") {
-      url = Image.files[0].file.url;
+      if (Image.files[0].type === "file") {
+        url = Image.files[0].file.url;
+      }
     }
     if (Name.type === "title") {
       title = Name.title[0].plain_text;
@@ -56,7 +56,9 @@ export const fetchCourses = async () => {
       description = Description.rich_text[0].plain_text;
     }
     if (Slug.type === "formula") {
-      slug = Slug.formula.string;
+      if (Slug.formula.type === "string") {
+        slug = Slug.formula.string;
+      }
     }
     if (Available.type === "checkbox") {
       available = Available.checkbox as unknown as boolean;
@@ -65,12 +67,12 @@ export const fetchCourses = async () => {
       database_id = Database.rich_text[0].plain_text;
     }
     courses.push({
-      image: url,
-      title,
-      description,
-      slug,
+      image: url as string,
+      title: title as string,
+      description: description as string,
+      slug: slug as string,
       available,
-      database_id,
+      database_id: database_id as string,
     });
   }
 
@@ -91,7 +93,7 @@ const getCourseDatabaseID = async (slug: string) => {
   });
   let databaseID;
   if (results.length > 0) {
-    const { properties } = results[0] as DatabaseObjectResponse;
+    const { properties } = results[0] as PageObjectResponse;
     const { Database } = properties;
     if (Database.type === "rich_text") {
       databaseID = Database.rich_text[0].plain_text;
@@ -103,7 +105,7 @@ const getCourseDatabaseID = async (slug: string) => {
 export const fetchPageBySlug = async (slug: string, course_slug: string) => {
   const database_id = await getCourseDatabaseID(course_slug);
   const results = await notion.databases.query({
-    database_id: database_id,
+    database_id: database_id as string,
     filter: {
       property: "Slug",
       formula: {
@@ -182,7 +184,7 @@ export const fetchSlugs = async () => {
   for (const course of courses) {
     if (course.available) {
       const notionDB = await fetchLessons(course.slug);
-      const { pages } = buildTree(notionDB.results as Page[]);
+      const { pages } = buildTree(notionDB.results as Page[], course.slug);
       for (const page of pages) {
         slugs.push({ course: course.slug, lesson: page.slug.split("/") });
       }

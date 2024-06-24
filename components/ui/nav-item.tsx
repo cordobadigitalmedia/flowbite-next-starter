@@ -3,9 +3,8 @@ import type { TreeNode } from "@/lib/utils/types";
 import { usePathname } from "next/navigation";
 import { LinkItem } from "./link-item";
 
-export function NavItem({ node }: { node: TreeNode }) {
+export function NavItem({ node, course }: { node: TreeNode; course: string }) {
   const pathname = usePathname();
-  console.log(pathname, node);
   return (
     <>
       {node.children.length > 0 ? (
@@ -54,15 +53,19 @@ export function NavItem({ node }: { node: TreeNode }) {
             <ul className="hs-accordion-group ps-3 pt-2">
               <>
                 {node.children.map((childNode) => (
-                  <NavItem node={childNode} key={childNode.id} />
+                  <NavItem
+                    node={childNode}
+                    key={childNode.id}
+                    course={course}
+                  />
                 ))}
               </>
             </ul>
           </div>
         </li>
       ) : (
-        <li key={node.slug}>
-          <LinkItem node={node} />
+        <li>
+          <LinkItem node={node} course={course} />
         </li>
       )}
     </>

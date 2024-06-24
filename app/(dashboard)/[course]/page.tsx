@@ -2,7 +2,7 @@ import { CustomMDX } from "@/components/ui/mdx-remote";
 import { fetchPageBySlug } from "@/lib/utils/notion";
 
 export default async function Page({ params }: { params: { course: string } }) {
-  const { markdown, type } = await fetchPageBySlug("welcome", params.course);
+  const { markdown } = await fetchPageBySlug("welcome", params.course);
   return (
     <>
       <div className="w-full max-w-7xl lg:ps-64">
