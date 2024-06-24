@@ -14,7 +14,6 @@ export function LinkItem({ node, course }: { node: TreeNode; course: string }) {
     <Link
       className={`my-1 flex items-center gap-x-3.5 rounded-lg px-2.5 py-2 text-sm text-neutral-700 hover:bg-gray-100  dark:text-white dark:hover:bg-gray-600 ${node.slug === pathname.replaceAll(`/${course}/`, "") ? ` bg-gray-100  dark:bg-neutral-700` : ``}`}
       href={`/${node.root_slug}/${node.slug}`}
-      prefetch={false}
     >
       {node.type === "assignment" && <FaUpload className="w-5" />}
       {node.type === "rich media" && <MdOutlinePermMedia className="w-5" />}
