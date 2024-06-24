@@ -2,6 +2,7 @@ import type { BasePage, Page, TreeNode } from "./types";
 
 export const buildTree = (
   pages: Page[],
+  course_slug: string,
 ): { tree: TreeNode[]; pages: BasePage[] } => {
   const nodeMap: Record<string, TreeNode> = {};
   const rootNodes: TreeNode[] = [];
@@ -12,6 +13,7 @@ export const buildTree = (
       id: page.id,
       title: page.properties.Name.title[0].plain_text,
       slug: page.properties.Slug.formula.string,
+      root_slug: course_slug,
       type: page.properties.type.select.name,
       children: [],
     };
@@ -37,7 +39,7 @@ export const buildTree = (
     flatpages.push({
       id: value.id,
       title: value.title,
-      slug: value.slug,
+      slug: `${course_slug}/${value.slug}`,
       type: value.type,
     });
   }

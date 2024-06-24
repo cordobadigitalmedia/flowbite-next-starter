@@ -1,22 +1,10 @@
-import { AssignmentUpload } from "@/components/ui/assignment-upload";
 import { Header } from "@/components/ui/header";
-import { Logo } from "@/components/ui/logo";
-import { CustomMDX } from "@/components/ui/mdx-remote";
-import { Sidebar } from "@/components/ui/sidebar";
-import { fetchPageBySlug, fetchSiteDB } from "@/lib/utils/notion";
-import { buildTree } from "@/lib/utils/parser";
-import type { Page } from "@/lib/utils/types";
 
-export default async function Page({
-  params,
-}: {
-  params: { lesson: string[] };
-}) {
-  const notionDB = await fetchSiteDB();
-  const { tree } = buildTree(notionDB.results as Page[]);
-  const { markdown, type } = await fetchPageBySlug(
-    params.lesson[params.lesson.length - 1],
-  );
+export default async function DashboardLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <div>
       <Header />
@@ -24,7 +12,7 @@ export default async function Page({
         <div className="flex items-center justify-between py-2">
           <ol className="ms-3 flex items-center whitespace-nowrap">
             <li className="flex items-center text-sm text-gray-800 dark:text-neutral-400">
-              Application Layout
+              Courses
               <svg
                 className="mx-3 size-2.5 shrink-0 overflow-visible text-gray-400 dark:text-neutral-500"
                 width="16"
@@ -73,36 +61,7 @@ export default async function Page({
           </button>
         </div>
       </div>
-      <div
-        id="application-sidebar"
-        className="hs-overlay fixed inset-y-0 start-0 z-[60] hidden w-[260px] -translate-x-full border-e border-gray-200 bg-white transition-all duration-300 [--auto-close:lg] hs-overlay-open:translate-x-0 lg:bottom-0 lg:end-auto lg:block lg:translate-x-0 dark:border-neutral-700 dark:bg-neutral-800"
-      >
-        <div className="px-8 pt-4">
-          <Logo />
-        </div>
-        <Sidebar navData={tree} />
-      </div>
-
-      <div className="w-full max-w-7xl lg:ps-64">
-        <div className="prose max-w-none space-y-4 p-4 sm:space-y-6 sm:p-6">
-          {type === "assignment" ? (
-            <>
-              <CustomMDX source={markdown} />
-              <AssignmentUpload />
-            </>
-          ) : (
-            <CustomMDX source={markdown} />
-          )}
-        </div>
-      </div>
+      {children}
     </div>
   );
-}
-
-export async function generateStaticParams() {
-  const notionDB = await fetchSiteDB();
-  const { pages } = buildTree(notionDB.results as Page[]);
-  return pages.map((node) => ({
-    lesson: node.slug.split("/"),
-  }));
 }

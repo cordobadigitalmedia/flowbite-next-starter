@@ -1,6 +1,5 @@
 {
   "headerLinks": [
-    { "name": "Courses", "href": "/courses" },
     { "name": "About", "href": "/about" },
     { "name": "Community", "href": "/community" }
   ],
