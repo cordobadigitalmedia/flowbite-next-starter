@@ -2,6 +2,8 @@ import { AssignmentUpload } from "@/components/ui/assignment-upload";
 import { CustomMDX } from "@/components/ui/mdx-remote";
 import { fetchPageBySlug, fetchSlugs } from "@/lib/utils/notion";
 
+export const dynamic = "force-static";
+
 export default async function Page({
   params,
 }: {

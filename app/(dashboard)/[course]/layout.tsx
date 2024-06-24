@@ -4,7 +4,9 @@ import { fetchLessons } from "@/lib/utils/notion";
 import { buildTree } from "@/lib/utils/parser";
 import type { Page } from "@/lib/utils/types";
 
-export default async function Wrapper({
+export const dynamic = "force-static";
+
+export default async function Layout({
   children,
   params,
 }: {
