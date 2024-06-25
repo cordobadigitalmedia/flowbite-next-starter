@@ -1,55 +1,18 @@
-import navLinks from "@/lib/data/navigation.json";
 import Image from "next/image";
-import Link from "next/link";
 import { Logo } from "./logo";
-import { Switcher } from "./theme-switcher";
 
 export function Header() {
-  const { headerLinks } = navLinks;
   return (
-    <header className="sticky inset-x-0 top-0 z-[48] flex w-full flex-wrap border-b bg-white py-2.5 text-sm sm:flex-nowrap sm:justify-start sm:py-4 lg:ps-64 dark:border-neutral-700 dark:bg-neutral-800">
+    <header className="sticky inset-x-0 top-0 z-[48]  flex w-full  flex-wrap border-b bg-white py-2.5 text-sm  sm:justify-start dark:border-neutral-700 dark:bg-neutral-800">
       <nav
-        className="mx-auto flex w-full basis-full items-center px-4 sm:px-6"
+        className="mx-auto flex max-w-7xl basis-full items-center px-4 sm:px-6"
         aria-label="Global"
       >
-        <div className="me-5 lg:me-0 lg:hidden">
-          <Logo iconOnly />
+        <div className="me-2">
+          <Logo />
         </div>
-
         <div className="ms-auto flex w-full items-center justify-end sm:order-3 sm:justify-between sm:gap-x-3">
-          <div className="sm:hidden">
-            <button
-              type="button"
-              className="inline-flex size-[2.375rem] items-center justify-center gap-x-2 rounded-full border border-transparent text-sm font-semibold text-gray-800 hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-50 dark:text-white dark:hover:bg-neutral-700"
-            >
-              <svg
-                className="size-4 shrink-0"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.3-4.3" />
-              </svg>
-            </button>
-          </div>
-          <div className="hidden gap-4 sm:flex">
-            {headerLinks.map((item) => (
-              <Link
-                key={item.name}
-                className="hover:text-blue-70 inline-flex items-center gap-x-2 whitespace-nowrap text-sm text-blue-600 focus:text-blue-700 focus:outline-none dark:text-blue-500 dark:focus:text-blue-400"
-                href={item.href}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </div>
+          <div className="text-lg text-slate-600">Lawh Learning</div>
           <div className="hidden sm:block">
             <label htmlFor="icon" className="sr-only">
               Search
@@ -83,28 +46,6 @@ export function Header() {
           </div>
 
           <div className="flex flex-row items-center justify-end gap-2">
-            <Switcher />
-            <button
-              type="button"
-              className="inline-flex size-[2.375rem] items-center justify-center gap-x-2 rounded-full border border-transparent text-sm font-semibold text-gray-800 hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-50 dark:text-white dark:hover:bg-neutral-700"
-              data-hs-offcanvas="#hs-offcanvas-right"
-            >
-              <svg
-                className="size-4 shrink-0"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-              </svg>
-            </button>
-
             <div className="hs-dropdown relative inline-flex [--placement:bottom-right]">
               <button
                 id="hs-dropdown-with-header"
