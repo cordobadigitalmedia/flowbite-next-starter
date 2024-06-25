@@ -26,9 +26,9 @@ const fetchDBItems = async (id: string) => {
 };
 
 export const fetchLessons = async (slug: string) => {
-  const database_id = await getCourseDatabaseID(slug);
+  const { database_id, title } = await getCourseDatabaseID(slug);
   const results = await fetchDBItems(database_id as string);
-  return results;
+  return { results, title };
 };
 
 export const fetchCourses = async () => {
@@ -91,19 +91,23 @@ const getCourseDatabaseID = async (slug: string) => {
       },
     },
   });
-  let databaseID;
+  let database_id;
+  let title;
   if (results.length > 0) {
     const { properties } = results[0] as PageObjectResponse;
-    const { Database } = properties;
+    const { Database, Name } = properties;
     if (Database.type === "rich_text") {
-      databaseID = Database.rich_text[0].plain_text;
+      database_id = Database.rich_text[0].plain_text;
+    }
+    if (Name.type === "title") {
+      title = Name.title[0].plain_text;
     }
   }
-  return databaseID;
+  return { database_id, title };
 };
 
 export const fetchPageBySlug = async (slug: string, course_slug: string) => {
-  const database_id = await getCourseDatabaseID(course_slug);
+  const { database_id } = await getCourseDatabaseID(course_slug);
   const results = await notion.databases.query({
     database_id: database_id as string,
     filter: {
@@ -174,8 +178,8 @@ export const fetchSlugs = async () => {
   const slugs: CoursePaths[] = [];
   for (const course of courses) {
     if (course.available) {
-      const notionDB = await fetchLessons(course.slug);
-      const { pages } = buildTree(notionDB.results as Page[], course.slug);
+      const { results } = await fetchLessons(course.slug);
+      const { pages } = buildTree(results.results as Page[], course.slug);
       for (const page of pages) {
         slugs.push({ course: course.slug, lesson: page.slug.split("/") });
       }

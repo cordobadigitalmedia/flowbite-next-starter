@@ -13,8 +13,8 @@ export default async function Layout({
   children: React.ReactNode;
   params: { course: string };
 }) {
-  const notionDB = await fetchLessons(params.course);
-  const { tree } = buildTree(notionDB.results as Page[], params.course);
+  const { results, title } = await fetchLessons(params.course);
+  const { tree } = buildTree(results.results as Page[], params.course);
   return (
     <>
       <div
@@ -22,7 +22,7 @@ export default async function Layout({
         className="hs-overlay fixed inset-y-0 start-0 z-[60] hidden w-[260px] -translate-x-full border-e border-gray-200 bg-white transition-all duration-300 [--auto-close:lg] hs-overlay-open:translate-x-0 lg:bottom-0 lg:end-auto lg:block lg:translate-x-0 dark:border-neutral-700 dark:bg-neutral-800"
       >
         <div className="px-8 pt-4">
-          <Logo />
+          <Logo title={title} />
         </div>
         <Sidebar navData={tree} course={params.course} />
       </div>
