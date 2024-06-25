@@ -107,7 +107,7 @@ const getCourseDatabaseID = async (slug: string) => {
 };
 
 export const fetchPageBySlug = async (slug: string, course_slug: string) => {
-  const { database_id, title } = await getCourseDatabaseID(course_slug);
+  const { database_id } = await getCourseDatabaseID(course_slug);
   const results = await notion.databases.query({
     database_id: database_id as string,
     filter: {
