@@ -9,7 +9,7 @@ export function Sidebar({
   course: string;
 }) {
   return (
-    <nav className="hs-accordion-group flex w-full flex-col flex-wrap p-6">
+    <nav className="hs-accordion-group flex w-full flex-col flex-wrap px-6">
       <ul className="space-y-1.5">
         {navData.map((node) => (
           <NavItem node={node} key={node.id} course={course} />
