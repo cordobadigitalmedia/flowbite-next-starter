@@ -1,4 +1,7 @@
-import type { BasePage, Page, TreeNode } from "./types";
+import { put } from "@vercel/blob";
+import * as fs from "fs";
+import * as path from "path";
+import type { BasePage, DataJson, Page, TreeNode } from "./types";
 
 export const buildTree = (
   pages: Page[],
@@ -66,3 +69,78 @@ export function transformToEmbedUrl(url: string): string | null {
   const match = url.match(regex);
   return match ? `https://www.youtube.com/embed/${match[1]}` : null;
 }
+
+export const extractIdFromUrl = (url: string): string | null => {
+  try {
+    // Use URL API to parse the URL
+    const parsedUrl = new URL(url);
+
+    // Get the pathname and split by '/'
+    const pathSegments = parsedUrl.pathname.split("/");
+
+    // Assuming the ID is between the filename and the previous '/'
+    if (pathSegments.length >= 3) {
+      // The ID should be the second last segment
+      return pathSegments[pathSegments.length - 2];
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Invalid URL:", error);
+    return null;
+  }
+};
+
+export const checkIdInJson = (
+  filePath: string,
+  targetId: string,
+): undefined | { url: string | undefined; data: unknown } => {
+  try {
+    // Read the file synchronously
+    const data = fs.readFileSync(filePath, "utf8");
+
+    // Parse the JSON data
+    const jsonData: DataJson = JSON.parse(data);
+    for (const image of jsonData.images) {
+      // eslint-disable-next-line no-prototype-builtins
+      if (image.hasOwnProperty(targetId)) {
+        return { url: image[targetId], data };
+      }
+    }
+    return { url: undefined, data: jsonData };
+  } catch (err) {
+    console.error("Error reading or parsing the file:", err);
+    return undefined;
+  }
+};
+
+export const uploadImage = async (img_url: string, log_file: string) => {
+  const imageID = extractIdFromUrl(img_url);
+  const jsonFilePath = path.resolve(process.cwd(), `lib/data/${log_file}.json`);
+  let uploadedURL;
+  const logData = checkIdInJson(jsonFilePath, imageID as string);
+  if (!logData?.url || !logData) {
+    const imageResponse = await fetch(img_url);
+    if (!imageResponse.ok) {
+      throw new Error("Failed to fetch image");
+    }
+    const imageBuffer = await imageResponse.arrayBuffer();
+    const blob = await put("lms-image", imageBuffer, {
+      access: "public",
+    });
+    console.log(`Uploaded ${imageID} to ${blob.url}`);
+    uploadedURL = blob.downloadUrl;
+    if (logData) {
+      const data = logData.data as DataJson;
+      data.images.push({ [`${imageID}`]: blob.downloadUrl });
+      fs.writeFileSync(jsonFilePath, JSON.stringify(data, null, 2), "utf8");
+    } else {
+      const data: DataJson = { images: [] };
+      data.images.push({ [`${imageID}`]: blob.downloadUrl });
+      fs.writeFileSync(jsonFilePath, JSON.stringify(data, null, 2), "utf8");
+    }
+  } else {
+    uploadedURL = logData.url;
+  }
+  return uploadedURL;
+};

@@ -1,12 +1,11 @@
 import { Client } from "@notionhq/client";
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-import { put } from "@vercel/blob";
 import { NotionToMarkdown } from "notion-to-md";
-import { buildTree } from "./parser";
+import { buildTree, uploadImage } from "./parser";
 import type { ContentType, CourseItem, CoursePaths, Page } from "./types";
 
-const imgPrefix = `<div class="not-prose flex flex-col justify-center items-center p-0 m-0">`;
-const captionPrefix = `<div class="text-sm text-gray-400 pt-2 text-center">`;
+const imgPrefix = `<div className="not-prose flex flex-col justify-center items-center p-0 m-0">`;
+const captionPrefix = `<div className="text-sm text-gray-400 pt-2 text-center">`;
 
 export const notion = new Client({
   auth: process.env.NOTION_SECRET,
@@ -46,7 +45,8 @@ export const fetchCourses = async () => {
     let database_id;
     if (Image.type === "files") {
       if (Image.files[0].type === "file") {
-        url = Image.files[0].file.url;
+        const img_url = Image.files[0].file.url;
+        url = await uploadImage(img_url, "root");
       }
     }
     if (Name.type === "title") {
@@ -115,6 +115,7 @@ export const fetchPageBySlug = async (slug: string, course_slug: string) => {
       },
     },
   });
+  const log_slug = `${course_slug}_${slug.replaceAll("/", "_")}`;
   if (results.results.length > 0) {
     const pageid = results.results[0].id;
     const pageResp = results.results[0] as PageObjectResponse;
@@ -126,14 +127,18 @@ export const fetchPageBySlug = async (slug: string, course_slug: string) => {
       cType = name;
     }
     //pass database id to fecthMD
-    const pageData = await fetchPageMD(pageid, cType as ContentType);
+    const pageData = await fetchPageMD(pageid, cType as ContentType, log_slug);
     return pageData;
   } else {
     return { markdown: "", blocks: "", type: "rich text" };
   }
 };
 
-export const fetchPageMD = async (id: string, type: ContentType) => {
+export const fetchPageMD = async (
+  id: string,
+  type: ContentType,
+  log_file: string,
+) => {
   const n2m = new NotionToMarkdown({ notionClient: notion });
   n2m.setCustomTransformer("video", async (block) => {
     //eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -155,22 +160,8 @@ export const fetchPageMD = async (id: string, type: ContentType) => {
     if (caption.length > 0) {
       captionText = caption.map((item) => item.plain_text).join("\n");
     }
-    if (process.env.ENABLE_UPLOAD === "true") {
-      //use database id to check if image was uploaded before
-      //Save the image id from the url `/032244c2-cdae-4189-be3d-12360518595e/filename.png/jpg` in string separated by | - compare in future to check if exists
-      const imageResponse = await fetch(img_url);
-      if (!imageResponse.ok) {
-        throw new Error("Failed to fetch image");
-      }
-      const imageBuffer = await imageResponse.arrayBuffer();
-      const blob = await put("lms-image", imageBuffer, {
-        access: "public",
-      });
-      returnComp += `${imgPrefix}<img src="${blob.downloadUrl}" alt="${captionText}"/>${captionPrefix}${captionText}</div></div>`;
-    } else {
-      returnComp += `${imgPrefix}<img src="${img_url}" alt="${captionText}"/>${captionPrefix}${captionText}</div></div>`;
-    }
-    //after successful upload, set checkbox for database row to checked
+    const uploadedURL = await uploadImage(img_url, log_file);
+    returnComp += `${imgPrefix}<img src="${uploadedURL}" alt="${captionText}"/>${captionPrefix}${captionText}</div></div>`;
     return returnComp;
   });
   const mdblocks = await n2m.pageToMarkdown(id);
