@@ -19,10 +19,6 @@
     "start": "next start",
     "typecheck": "tsc --noEmit"
   },
-  "engines": {
-    "node": ">= 16",
-    "npm": ">= 8"
-  },
   "dependencies": {
     "@clerk/nextjs": "^5.1.4",
     "@notionhq/client": "^2.2.15",

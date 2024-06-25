@@ -1,13 +1,20 @@
 import type { CourseItem } from "@/lib/utils/types";
+import Image from "next/image";
 import Link from "next/link";
 
 export function Card({ item }: { item: CourseItem }) {
   return (
     <div className="flex flex-col rounded-xl border bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-neutral-700/70">
-      <img
-        className="h-auto w-full rounded-t-xl"
-        src={item.image}
+      <Image
         alt={item.title}
+        className="h-[150px] w-full rounded-t-lg object-cover sm:h-[250px]"
+        height={300}
+        src={item.image}
+        style={{
+          aspectRatio: "400/300",
+          objectFit: "cover",
+        }}
+        width={400}
       />
       <div className="p-4 md:p-5">
         <h3 className="text-lg font-bold text-gray-800 dark:text-white">

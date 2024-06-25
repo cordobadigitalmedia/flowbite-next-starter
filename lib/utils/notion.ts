@@ -1,17 +1,8 @@
 import { Client } from "@notionhq/client";
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-import { put } from "@vercel/blob";
-import * as fs from "fs";
 import { NotionToMarkdown } from "notion-to-md";
-import * as path from "path";
-import { buildTree, checkIdInJson, extractIdFromUrl } from "./parser";
-import type {
-  ContentType,
-  CourseItem,
-  CoursePaths,
-  DataJson,
-  Page,
-} from "./types";
+import { buildTree, uploadImage } from "./parser";
+import type { ContentType, CourseItem, CoursePaths, Page } from "./types";
 
 const imgPrefix = `<div className="not-prose flex flex-col justify-center items-center p-0 m-0">`;
 const captionPrefix = `<div className="text-sm text-gray-400 pt-2 text-center">`;
@@ -54,7 +45,8 @@ export const fetchCourses = async () => {
     let database_id;
     if (Image.type === "files") {
       if (Image.files[0].type === "file") {
-        url = Image.files[0].file.url;
+        const img_url = Image.files[0].file.url;
+        url = await uploadImage(img_url, "root");
       }
     }
     if (Name.type === "title") {
@@ -168,36 +160,7 @@ export const fetchPageMD = async (
     if (caption.length > 0) {
       captionText = caption.map((item) => item.plain_text).join("\n");
     }
-    const imageID = extractIdFromUrl(img_url);
-    const jsonFilePath = path.resolve(
-      process.cwd(),
-      `lib/data/${log_file}.json`,
-    );
-    let uploadedURL;
-    const logData = checkIdInJson(jsonFilePath, imageID as string);
-    if (!logData?.url || !logData) {
-      const imageResponse = await fetch(img_url);
-      if (!imageResponse.ok) {
-        throw new Error("Failed to fetch image");
-      }
-      const imageBuffer = await imageResponse.arrayBuffer();
-      const blob = await put("lms-image", imageBuffer, {
-        access: "public",
-      });
-      console.log(`Uploaded ${imageID} to ${blob.url}`);
-      uploadedURL = blob.downloadUrl;
-      if (logData) {
-        const data = logData.data as DataJson;
-        data.images.push({ [`${imageID}`]: blob.downloadUrl });
-        fs.writeFileSync(jsonFilePath, JSON.stringify(data, null, 2), "utf8");
-      } else {
-        const data: DataJson = { images: [] };
-        data.images.push({ [`${imageID}`]: blob.downloadUrl });
-        fs.writeFileSync(jsonFilePath, JSON.stringify(data, null, 2), "utf8");
-      }
-    } else {
-      uploadedURL = logData.url;
-    }
+    const uploadedURL = await uploadImage(img_url, log_file);
     returnComp += `${imgPrefix}<img src="${uploadedURL}" alt="${captionText}"/>${captionPrefix}${captionText}</div></div>`;
     return returnComp;
   });

@@ -1,4 +1,6 @@
+import { put } from "@vercel/blob";
 import * as fs from "fs";
+import * as path from "path";
 import type { BasePage, DataJson, Page, TreeNode } from "./types";
 
 export const buildTree = (
@@ -110,4 +112,35 @@ export const checkIdInJson = (
     console.error("Error reading or parsing the file:", err);
     return undefined;
   }
+};
+
+export const uploadImage = async (img_url: string, log_file: string) => {
+  const imageID = extractIdFromUrl(img_url);
+  const jsonFilePath = path.resolve(process.cwd(), `lib/data/${log_file}.json`);
+  let uploadedURL;
+  const logData = checkIdInJson(jsonFilePath, imageID as string);
+  if (!logData?.url || !logData) {
+    const imageResponse = await fetch(img_url);
+    if (!imageResponse.ok) {
+      throw new Error("Failed to fetch image");
+    }
+    const imageBuffer = await imageResponse.arrayBuffer();
+    const blob = await put("lms-image", imageBuffer, {
+      access: "public",
+    });
+    console.log(`Uploaded ${imageID} to ${blob.url}`);
+    uploadedURL = blob.downloadUrl;
+    if (logData) {
+      const data = logData.data as DataJson;
+      data.images.push({ [`${imageID}`]: blob.downloadUrl });
+      fs.writeFileSync(jsonFilePath, JSON.stringify(data, null, 2), "utf8");
+    } else {
+      const data: DataJson = { images: [] };
+      data.images.push({ [`${imageID}`]: blob.downloadUrl });
+      fs.writeFileSync(jsonFilePath, JSON.stringify(data, null, 2), "utf8");
+    }
+  } else {
+    uploadedURL = logData.url;
+  }
+  return uploadedURL;
 };
