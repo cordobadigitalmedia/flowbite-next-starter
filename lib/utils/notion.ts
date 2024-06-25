@@ -1,12 +1,20 @@
 import { Client } from "@notionhq/client";
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import { put } from "@vercel/blob";
+import * as fs from "fs";
 import { NotionToMarkdown } from "notion-to-md";
-import { buildTree } from "./parser";
-import type { ContentType, CourseItem, CoursePaths, Page } from "./types";
+import * as path from "path";
+import { buildTree, checkIdInJson, extractIdFromUrl } from "./parser";
+import type {
+  ContentType,
+  CourseItem,
+  CoursePaths,
+  DataJson,
+  Page,
+} from "./types";
 
-const imgPrefix = `<div class="not-prose flex flex-col justify-center items-center p-0 m-0">`;
-const captionPrefix = `<div class="text-sm text-gray-400 pt-2 text-center">`;
+const imgPrefix = `<div className="not-prose flex flex-col justify-center items-center p-0 m-0">`;
+const captionPrefix = `<div className="text-sm text-gray-400 pt-2 text-center">`;
 
 export const notion = new Client({
   auth: process.env.NOTION_SECRET,
@@ -115,6 +123,7 @@ export const fetchPageBySlug = async (slug: string, course_slug: string) => {
       },
     },
   });
+  const log_slug = `${course_slug}_${slug.replaceAll("/", "_")}`;
   if (results.results.length > 0) {
     const pageid = results.results[0].id;
     const pageResp = results.results[0] as PageObjectResponse;
@@ -126,14 +135,18 @@ export const fetchPageBySlug = async (slug: string, course_slug: string) => {
       cType = name;
     }
     //pass database id to fecthMD
-    const pageData = await fetchPageMD(pageid, cType as ContentType);
+    const pageData = await fetchPageMD(pageid, cType as ContentType, log_slug);
     return pageData;
   } else {
     return { markdown: "", blocks: "", type: "rich text" };
   }
 };
 
-export const fetchPageMD = async (id: string, type: ContentType) => {
+export const fetchPageMD = async (
+  id: string,
+  type: ContentType,
+  log_file: string,
+) => {
   const n2m = new NotionToMarkdown({ notionClient: notion });
   n2m.setCustomTransformer("video", async (block) => {
     //eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -155,9 +168,14 @@ export const fetchPageMD = async (id: string, type: ContentType) => {
     if (caption.length > 0) {
       captionText = caption.map((item) => item.plain_text).join("\n");
     }
-    if (process.env.ENABLE_UPLOAD === "true") {
-      //use database id to check if image was uploaded before
-      //Save the image id from the url `/032244c2-cdae-4189-be3d-12360518595e/filename.png/jpg` in string separated by | - compare in future to check if exists
+    const imageID = extractIdFromUrl(img_url);
+    const jsonFilePath = path.resolve(
+      process.cwd(),
+      `lib/data/${log_file}.json`,
+    );
+    let uploadedURL;
+    const logData = checkIdInJson(jsonFilePath, imageID as string);
+    if (!logData?.url || !logData) {
       const imageResponse = await fetch(img_url);
       if (!imageResponse.ok) {
         throw new Error("Failed to fetch image");
@@ -166,11 +184,20 @@ export const fetchPageMD = async (id: string, type: ContentType) => {
       const blob = await put("lms-image", imageBuffer, {
         access: "public",
       });
-      returnComp += `${imgPrefix}<img src="${blob.downloadUrl}" alt="${captionText}"/>${captionPrefix}${captionText}</div></div>`;
+      uploadedURL = blob.downloadUrl;
+      if (logData) {
+        const data = logData.data as DataJson;
+        data.images.push({ [`${imageID}`]: blob.downloadUrl });
+        fs.writeFileSync(jsonFilePath, JSON.stringify(data, null, 2), "utf8");
+      } else {
+        const data: DataJson = { images: [] };
+        data.images.push({ [`${imageID}`]: blob.downloadUrl });
+        fs.writeFileSync(jsonFilePath, JSON.stringify(data, null, 2), "utf8");
+      }
     } else {
-      returnComp += `${imgPrefix}<img src="${img_url}" alt="${captionText}"/>${captionPrefix}${captionText}</div></div>`;
+      uploadedURL = logData.url;
     }
-    //after successful upload, set checkbox for database row to checked
+    returnComp += `${imgPrefix}<img src="${uploadedURL}" alt="${captionText}"/>${captionPrefix}${captionText}</div></div>`;
     return returnComp;
   });
   const mdblocks = await n2m.pageToMarkdown(id);

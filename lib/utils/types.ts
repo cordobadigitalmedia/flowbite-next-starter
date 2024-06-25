@@ -94,3 +94,11 @@ export interface CoursePaths {
   course: string;
   lesson?: string[];
 }
+
+export interface ImageJson {
+  [key: string]: string;
+}
+
+export interface DataJson {
+  images: ImageJson[];
+}
