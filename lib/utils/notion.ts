@@ -184,6 +184,7 @@ export const fetchPageMD = async (
       const blob = await put("lms-image", imageBuffer, {
         access: "public",
       });
+      console.log(`Uploaded ${imageID} to ${blob.url}`);
       uploadedURL = blob.downloadUrl;
       if (logData) {
         const data = logData.data as DataJson;
